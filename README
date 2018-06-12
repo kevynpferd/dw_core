@@ -1,0 +1,10 @@
+DeviceWatcher Core
+=
+**Be aware that this project is still a work in progress and may not work properly yet!**
+
+## License
+This project is licensed under the BSD3 license. To see full details, open up [LICENSE].
+
+[Java implementation by mrniko]: https://github.com/mrniko/netty-socketio
+[socket.io]: https://github.com/socketio/socket.io
+[LICENSE]: https://github.com/kevynpferd/dw_core/blob/master/LICENSE
