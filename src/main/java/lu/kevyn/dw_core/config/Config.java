@@ -42,6 +42,7 @@ public class Config extends JsonFile {
 		super(DW, "config");
 	}
 	
+	@Override
 	public void checkValues() {
 		checkValue("Debug", "false");
 		

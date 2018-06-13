@@ -167,7 +167,7 @@ public class JsonFile {
 		}
 	}
 	
-	private void checkValues() {
+	public void checkValues() {
 		checkValue("application", Info.SHORT);
 		checkValue("version", Info.VERSION);
 	}
