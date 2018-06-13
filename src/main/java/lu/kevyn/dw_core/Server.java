@@ -34,6 +34,76 @@
 
 package lu.kevyn.dw_core;
 
-public class Server {
+import com.corundumstudio.socketio.Configuration;
+import com.corundumstudio.socketio.SocketConfig;
+import com.corundumstudio.socketio.SocketIOServer;
+
+import lu.kevyn.dw_core.event.ConnectEvent;
+import lu.kevyn.dw_core.event.DisconnectEvent;
+
+public class Server implements Runnable {
+	
+	Core DW;
+	
+	static Thread thread;
+	private SocketIOServer server = null;
+	
+	private String host = "localhost";
+	private Integer port = 8080;
+	
+	public Server(Core DW) {
+		this.DW = DW;
+		
+		host = DW.config.get("Socket server > host");
+		port = DW.config.getInt("Socket server > port");
+	}
+	
+	public void start() {
+		if(thread != null) return;
+		
+		thread = new Thread(this);
+		thread.start();
+	}
+	
+	public void stop() {
+		DW.log.info("Stopping Socket.IO server ..");
+		DW.log.socket.info("Stopping Socket.IO server ..");
+		
+		server.stop();
+		thread.interrupt();
+		
+		DW.log.socket.info("Stopped Socket.IO server.");
+		
+		thread = null;
+	}
+	
+	@Override
+	public void run() {
+		SocketConfig sConfig = new SocketConfig();
+		sConfig.setReuseAddress(true);
+		
+		Configuration config = new Configuration();
+		config.setHostname(host);
+		config.setPort(port);
+		config.setSocketConfig(sConfig);
+		
+		server = new SocketIOServer(config);
+		
+		server.addConnectListener(new ConnectEvent(DW));
+		server.addDisconnectListener(new DisconnectEvent(DW));
+		
+		DW.log.info("Starting Socket.IO server on "+ host +":"+ port +" ..");
+		DW.log.socket.info("Starting Socket.IO server on "+ host +":"+ port +" ..");
+		
+		server.start();
+		
+		DW.log.socket.info("Started Socket.IO server.");
+		DW.log.info("DeviceWatcher Core is now fully started.");
+		DW.log.emptyLine();
+	}
+	
+	public SocketIOServer get() {
+		return server;
+	}
 
 }
