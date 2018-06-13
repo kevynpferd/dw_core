@@ -62,10 +62,12 @@ public class Core {
 		config = new Config(this);
 		
 		IR = new InputReader(this);
+		server = new Server(this);
 		
 		DEBUG = config.getBool("Debug");
 		
 		IR.start();
+		server.start();
 	}
 	
 	public void quit() {
@@ -73,6 +75,7 @@ public class Core {
 		log.info("Stopping ..");
 		
 		IR.stop();
+		server.stop();
 		
 		log.info("DeviceWatcher Core stopped.");
 		
