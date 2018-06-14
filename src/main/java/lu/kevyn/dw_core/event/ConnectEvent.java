@@ -34,22 +34,19 @@
 
 package lu.kevyn.dw_core.event;
 
-import com.corundumstudio.socketio.SocketIOClient;
-import com.corundumstudio.socketio.listener.ConnectListener;
+import org.java_websocket.WebSocket;
+import org.java_websocket.handshake.ClientHandshake;
 
 import lu.kevyn.dw_core.Core;
 
-public class ConnectEvent implements ConnectListener {
+public class ConnectEvent {
 	
 	Core DW;
 	
-	public ConnectEvent(Core DW) {
+	public ConnectEvent(Core DW, WebSocket conn, ClientHandshake handshake) {
 		this.DW = DW;
-	}
-	
-	@Override
-	public void onConnect(SocketIOClient client) {
-		String logMessage = "New connection > "+ client.getSessionId() +" on "+ client.getRemoteAddress();
+		
+		String logMessage = "New connection > "+ handshake.getResourceDescriptor() +" on "+ conn.getRemoteSocketAddress();
 		
 		DW.log.info(logMessage);
 		DW.log.socket.info(logMessage);

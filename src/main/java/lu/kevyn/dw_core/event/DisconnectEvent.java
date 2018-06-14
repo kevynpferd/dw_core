@@ -35,25 +35,20 @@
 
 package lu.kevyn.dw_core.event;
 
-import com.corundumstudio.socketio.SocketIOClient;
-import com.corundumstudio.socketio.listener.DisconnectListener;
+import org.java_websocket.WebSocket;
 
 import lu.kevyn.dw_core.Core;
 
-public class DisconnectEvent implements DisconnectListener {
+public class DisconnectEvent {
 	
 	Core DW;
 	
-	public DisconnectEvent(Core DW) {
+	public DisconnectEvent(Core DW, WebSocket conn, int code, String reason, boolean remote) {
 		this.DW = DW;
-	}
-	
-	@Override
-	public void onDisconnect(SocketIOClient client) {
-		String logMessage = "Dropped connection > "+ client.getSessionId();
+		
+		String logMessage = "Dropped connection > "+ conn.getRemoteSocketAddress() +" with exit code "+ code +" additional info: "+ reason;
 		
 		DW.log.info(logMessage);
 		DW.log.socket.info(logMessage);
 	}
-
 }
