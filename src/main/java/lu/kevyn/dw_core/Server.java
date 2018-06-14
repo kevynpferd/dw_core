@@ -34,76 +34,51 @@
 
 package lu.kevyn.dw_core;
 
-import com.corundumstudio.socketio.Configuration;
-import com.corundumstudio.socketio.SocketConfig;
-import com.corundumstudio.socketio.SocketIOServer;
+import java.net.InetSocketAddress;
+
+import org.java_websocket.WebSocket;
+import org.java_websocket.framing.Framedata;
+import org.java_websocket.handshake.ClientHandshake;
+import org.java_websocket.server.WebSocketServer;
 
 import lu.kevyn.dw_core.event.ConnectEvent;
 import lu.kevyn.dw_core.event.DisconnectEvent;
 
-public class Server implements Runnable {
+public class Server extends WebSocketServer {
 	
 	Core DW;
 	
-	static Thread thread;
-	private SocketIOServer server = null;
-	
-	private String host = "localhost";
-	private Integer port = 8080;
-	
 	public Server(Core DW) {
+		super(new InetSocketAddress(Core.host, Core.port));
+		
 		this.DW = DW;
-		
-		host = DW.config.get("Socket server > host");
-		port = DW.config.getInt("Socket server > port");
 	}
-	
-	public void start() {
-		if(thread != null) return;
-		
-		thread = new Thread(this);
-		thread.start();
-	}
-	
-	public void stop() {
-		DW.log.info("Stopping Socket.IO server ..");
-		DW.log.socket.info("Stopping Socket.IO server ..");
-		
-		server.stop();
-		thread.interrupt();
-		
-		DW.log.socket.info("Stopped Socket.IO server.");
-		
-		thread = null;
-	}
-	
+
 	@Override
-	public void run() {
-		SocketConfig sConfig = new SocketConfig();
-		sConfig.setReuseAddress(true);
-		
-		Configuration config = new Configuration();
-		config.setHostname(host);
-		config.setPort(port);
-		config.setSocketConfig(sConfig);
-		
-		server = new SocketIOServer(config);
-		
-		server.addConnectListener(new ConnectEvent(DW));
-		server.addDisconnectListener(new DisconnectEvent(DW));
-		
-		DW.log.info("Starting Socket.IO server on "+ host +":"+ port +" ..");
-		DW.log.socket.info("Starting Socket.IO server on "+ host +":"+ port +" ..");
-		
-		server.start();
-		
-		DW.log.socket.info("Started Socket.IO server.");
+	public void onOpen(WebSocket conn, ClientHandshake handshake) {
+		new ConnectEvent(DW, conn, handshake);
+	}
+
+	@Override
+	public void onClose(WebSocket conn, int code, String reason, boolean remote) {
+		new DisconnectEvent(DW, conn, code, reason, remote);
+	}
+
+	@Override
+	public void onMessage(WebSocket conn, String message) {
+		DW.log.info("received message from "+ conn.getRemoteSocketAddress() + ": " + message);
+	}
+
+	@Override
+	public void onError(WebSocket conn, Exception ex) {
+		DW.log.error("an error occured on connection " + conn.getRemoteSocketAddress()  + ":" + ex);
+	}
+
+	@Override
+	public void onStart() {
+		DW.log.socket.info("Started socket server.");
 		DW.log.info("DeviceWatcher Core is now fully started.");
 		DW.log.emptyLine();
 	}
 	
-	public SocketIOServer get() {
-		return server;
-	}
-
 }
