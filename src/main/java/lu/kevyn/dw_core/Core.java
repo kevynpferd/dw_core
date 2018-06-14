@@ -34,8 +34,10 @@
 
 package lu.kevyn.dw_core;
 
+import org.java_websocket.server.WebSocketServer;
+
 import lu.kevyn.dw_core.config.Config;
-import lu.kevyn.dw_core.folder.InputReader;
+import lu.kevyn.dw_core.input.InputReader;
 import lu.kevyn.dw_core.util.LogUtil;
 
 public class Core {
@@ -47,7 +49,10 @@ public class Core {
 	public Config config;
 	//public MySQL DB;
 	public InputReader IR;
-	public Server server;
+	public WebSocketServer server;
+	
+	public static String host = "localhost";
+	public static Integer port = 8080;
 	
 	public static void main(String[] args) {
 		new Core();
@@ -60,22 +65,37 @@ public class Core {
 		log.info("Initializing logging util(s) ..");
 		
 		config = new Config(this);
-		
 		IR = new InputReader(this);
+		
+		host = config.get("Socket server > host");
+		port = config.getInt("Socket server > port");
+		
+		log.info("Starting socket server on "+ host +":"+ port +" ..");
+		log.socket.info("Starting socket server on "+ host +":"+ port +" ..");
+		
 		server = new Server(this);
 		
 		DEBUG = config.getBool("Debug");
 		
 		IR.start();
-		server.start();
+		server.run();
 	}
 	
 	public void quit() {
 		log.emptyLine();
 		log.info("Stopping ..");
 		
-		IR.stop();
-		server.stop();
+		
+		try {
+			IR.stop();
+			
+			log.info("Stopping socket server ..");
+			log.socket.info("Stopping socket server ..");
+			
+			server.stop(2500);
+		} catch (InterruptedException ex) {
+			ex.printStackTrace();
+		}
 		
 		log.info("DeviceWatcher Core stopped.");
 		
