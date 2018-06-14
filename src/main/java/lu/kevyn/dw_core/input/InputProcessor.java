@@ -32,48 +32,49 @@
  * 
  */
 
-package lu.kevyn.dw_core.folder;
-
-import java.util.Scanner;
+package lu.kevyn.dw_core.input;
 
 import lu.kevyn.dw_core.Core;
 
-public class InputReader implements Runnable {
+public class InputProcessor {
 	
 	Core DW;
-	InputProcessor IP;
-	Scanner inputReader;
-	Boolean listening = true;
 	
-	static Thread thread;
-	
-	public InputReader(Core DW) {
+	public InputProcessor(Core DW) {
 		this.DW = DW;
-		this.IP = new InputProcessor(DW);
 	}
 	
-	public void start() {
-		if(thread != null) return;
+	public void process(String input) {
+		if(DW.DEBUG) DW.log.debug("New input > "+ input);
 		
-		DW.log.info("Starting command line input reader ..");
+		switch(input.toLowerCase()) {
 		
-		thread = new Thread(this);
-		thread.start();
-	}
-	
-	public void stop() {
-		DW.log.info("Stopping command line input reader ..");
-		
-		thread.interrupt();
-	}
-	
-	@Override
-	public void run() {
-		inputReader = new Scanner(System.in);
-		
-		while(listening) {
-			IP.process(inputReader.nextLine());
+			case "quit":
+				DW.quit();
+				break;
+				
+			case "exit":
+				DW.quit();
+				break;
+				
+			case "stop":
+				DW.quit();
+				break;
+				
+			case "mysql start":
+				break;
+				
+			case "mysql stop":
+				break;
+				
+			case "mysql restart":
+				break;
+				
+			default:
+				break;
+				
 		}
+		
 	}
 
 }
